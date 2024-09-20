@@ -1,5 +1,6 @@
 import { serve } from "@hono/node-server";
 import { Hono } from "hono";
+import { handle } from 'hono/vercel'
 import * as fs from "fs";
 import bs58 from 'bs58';
 import TonWeb from "tonweb";
@@ -7,13 +8,17 @@ import { logger } from 'hono/logger'
 import { HTTPException } from "hono/http-exception";
 import { SafematrixAuthMpc, SafematrixAuthMultiMpc } from "@safematrix-auth/mpc";
 import { getBytes, keccak256, ethers, hexlify, hashMessage } from "ethers";
-const app = new Hono();
+const app = new Hono().basePath('/api')
 const wasmBuffer = fs.readFileSync(__dirname + "/mpc_wasm_bg.wasm");
 export const customLogger = (message: string, ...rest: string[]) => {
   const date = new Date().toString()
   console.log(`[${date}]`,message, ...rest)
 }
 app.use(logger(customLogger))
+
+app.get('/', (c) => {
+  return c.json({ message: "Congrats! You've deployed Hono to Vercel" })
+});
 
 /// Generate mpc share
 /// query: t, n, engine (default: t=1, n=3, engine=ECDSA)
@@ -237,8 +242,17 @@ app.post("/sign_local", async (c) => {
   );
 });
 
-serve({
-  fetch: app.fetch,
-  port: 5000,
-});
+// serve({
+//   fetch: app.fetch,
+//   port: 5000,
+// });
+
+
+const handler = handle(app);
+
+export const GET = handler;
+export const POST = handler;
+export const PUT = handler;
+export const PATCH = handler;
+export const OPTIONS = handler;
 

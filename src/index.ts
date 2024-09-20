@@ -247,6 +247,8 @@ app.post("/sign_local", async (c) => {
 //   port: 5000,
 // });
 
+export default app;
+
 
 const handler = handle(app);
 
